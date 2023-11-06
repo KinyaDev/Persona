@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Persona - Editor</title>
+    <link rel="stylesheet" href="/assets/css/editor.css" />
+    <link rel="stylesheet" href="/assets/css/main.css" />
+  </head>
+  <body>
+    <div class="container">
+      <button id="savebtn">Save</button>
+      <div id="editorjs"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@editorjs/underline@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@editorjs/header@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@editorjs/list@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@editorjs/delimiter@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/editorjs-alert@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/editorjs-hyperlink@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@editorjs/link-autocomplete"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@editorjs/marker@latest"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/@editorjs/paragraph@latest"></script> -->
+    <script src="https://cdn.jsdelivr.net/npm/editorjs-change-case@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/editorjs-tooltip"></script>
+    <script src="https://cdn.jsdelivr.net/npm/editorjs-paragraph-with-alignment@3.0.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/editorjs-header-with-alignment@latest"></script>
+
+    <script>
+      var apiRoot = "<%- apiRoot %>";
+      var characterName = "<%- characterName %>";
+      var editing = Boolean("<%- editing %>");
+    </script>
+    <script src="/assets/js/editor.js"></script>
+  </body>
+</html>
