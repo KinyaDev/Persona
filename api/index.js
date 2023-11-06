@@ -57,26 +57,6 @@ route.get("/characters/:id", async (req, res) => {
       loreData: character.loreData,
     });
   }
-
-  if (!character) {
-    if (!ObjectId.isValid(req.params.id))
-      return res.status(404).json({ message: "invalid character id" });
-
-    let _id = new ObjectId(req.params.id);
-    character = await characters.findOne({ _id });
-    if (!character) res.status(404).json({ message: "invalid character id" });
-    else {
-      res.json({
-        name: character.name,
-        content: character.content,
-      });
-    }
-  } else {
-    res.json({
-      name: character.name,
-      content: character.content,
-    });
-  }
 });
 
 route.put("/characters", auth, async (req, res) => {
