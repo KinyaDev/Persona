@@ -61,13 +61,13 @@ route.get("/characters/:id", async (req, res) => {
 
 route.put("/characters", auth, async (req, res) => {
   let _id = new ObjectId(req.body._id);
-  let { content } = req.body;
+  let { loreData } = req.body;
 
   let character = await characters.findOne({ _id });
   if (!character) {
     res.status(404).json({ message: "invalid character id" });
   } else {
-    characters.updateOne({ _id }, { content: content });
+    characters.updateOne({ _id }, { loreData });
   }
 });
 
