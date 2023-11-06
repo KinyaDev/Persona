@@ -23,3 +23,10 @@ Persona is meant to be a website with a big database fed by the community.
 - [Early] Create a character page.
 - Ask the original creator of the page to edit the page.
 - [Late] With given character information, we can chat with the character powered by AI.
+
+# Libraries used
+
+- Editorjs
+- EJS
+- Express
+- Mongodb
