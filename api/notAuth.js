@@ -9,7 +9,13 @@ route.use(cookieParser());
 route.use(async (req, res, next) => {
   let token = req.cookies["token"];
   if (!token) return next();
-  else res.status(500).json({ message: "already logged in" });
+  else {
+    let u = await users.findOne({ token });
+
+    if (u) return res.status(500).json({ message: "already logged in" });
+    res.clearCookie("token");
+    res.redirect(req.originalUrl);
+  }
 });
 
 module.exports = route;

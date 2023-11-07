@@ -6,19 +6,82 @@ const notAuth = require("../notAuth");
 const multer = require("multer");
 const multerAvatar = multer({ dest: `${process.cwd()}/avatars` });
 const fs = require("fs");
+const bcrypt = require("bcrypt");
 
 function createToken() {
   let chars = "abcdefghijklmopqrtuvwxyz1234567890-.";
   let res = "";
 
   for (let i = 0; i < 20; i++) {
-    res += chars[Math.floor(Math.random())];
+    res += chars[Math.floor(Math.random() * chars.length)];
   }
 
   return res;
 }
 
 let route = Router();
+
+// Register
+
+route.post("/", notAuth, async (req, res) => {
+  let { username, password } = req.body;
+
+  if (!username || !password)
+    return res
+      .status(500)
+      .json({ message: "please provide password and username" });
+
+  if (username.length < 4)
+    return res
+      .status(500)
+      .json({ message: "username name must have more than 4 caracters" });
+
+  if (password.length < 8)
+    return res
+      .status(500)
+      .json({ message: "password must have at least 8 caracters" });
+
+  let exists = await users.findOne({ username });
+  if (exists) return res.status(500).json({ message: "already exist" });
+
+  let token = createToken();
+  let result = await users.insertOne({
+    username,
+    password: bcrypt.hashSync(password, 10),
+    login_timestamp: Date.now(),
+    created_timestamp: Date.now(),
+    token,
+  });
+
+  res.cookie("token", token);
+  res.json({ message: "ok", _id: result.insertedId.toString(), token });
+});
+
+// Login
+
+route.post("/login", notAuth, async (req, res) => {
+  let { username, password } = req.body;
+
+  let u = await users.findOne({ username });
+  if (!u)
+    return res.status(404).json({ message: "can't find user by username" });
+
+  users.updateOne({ _id: u._id }, { $set: { login_timestamp: Date.now() } });
+
+  if (bcrypt.compareSync(password, u.password)) {
+    res.cookie("token", u.token);
+    res.json({ message: "logged in", token: u.token });
+  }
+});
+
+// Disconnect (remove token from cookies)
+
+route.post("/disconnect", auth, async (req, res) => {
+  res.clearCookie("token");
+  res.json({ message: "ok" });
+});
+
+// Getting all existing profiles
 
 route.get("/", async (req, res) => {
   let array = await users.find().toArray();
@@ -27,13 +90,37 @@ route.get("/", async (req, res) => {
   for (let user of array) {
     parsedUsers.push({
       _id: user._id,
-      name: user.name,
+      username: user.username,
       avatar_url: user.avatar_url,
+      created_timestamp: user.created_timestamp,
+      login_timestamp: user.login_timestamp,
     });
   }
 
   res.json(parsedUsers);
 });
+
+// Getting logged profile
+
+route.get("/me", auth, async (req, res) => {
+  let u = await users.findOne({ token: req.cookies["token"] });
+
+  res.json({
+    username: u.username,
+    avatar_url: u.avatar_url,
+    email: u.email,
+    created_timestamp: u.created_timestamp,
+    login_timestamp: u.login_timestamp,
+  });
+});
+
+route.delete("/", auth, async (req, res) => {
+  users.deleteOne({ token: req.cookies.token });
+  res.clearCookie("token");
+  res.json({ message: "ok" });
+});
+
+// Getting a Profile by ID or by name
 
 route.get("/:id", async (req, res) => {
   if (ObjectId.isValid(req.params.id)) {
@@ -45,6 +132,8 @@ route.get("/:id", async (req, res) => {
     res.json({
       name: user.name,
       avatar_url: user.avatar_url,
+      created_timestamp: user.created_timestamp,
+      login_timestamp: user.login_timestamp,
     });
   } else {
     let user = await users.findOne({ name: req.params.id });
@@ -53,9 +142,13 @@ route.get("/:id", async (req, res) => {
     res.json({
       name: user.name,
       avatar_url: user.avatar_url,
+      created_timestamp: user.created_timestamp,
+      login_timestamp: user.login_timestamp,
     });
   }
 });
+
+// Updating avatar
 
 route.put(
   "/avatar",
@@ -74,6 +167,11 @@ route.put(
         .status(500)
         .json({ message: "avatar must be in the PNG or JPEG format" });
 
+    if (req.file.size > 5 * 10 ** 6)
+      return res
+        .status(500)
+        .json({ message: "avatar weight must be inferior to 5MB" });
+
     let newAvatar_url = avatar_url.replace(
       req.file.filename,
       user._id.toString()
@@ -81,34 +179,31 @@ route.put(
 
     fs.renameSync(avatar_url, newAvatar_url);
 
-    users.updateOne({ _id: user._id }, { avatar_url: newAvatar_url });
+    users.updateOne(
+      { _id: user._id },
+      { $set: { avatar_url: newAvatar_url, edited_timestamp: Date.now() } }
+    );
 
     res.json({ message: "ok", old: oldAvatarURL, new: newAvatar_url });
   }
 );
 
-route.post("/", notAuth, async (req, res) => {
-  let { username, password, avatar_url } = req.body;
-
-  let exists = await users.findOne({ username });
-  if (!exists) {
-    let token = createToken();
-    let result = await users.insertOne({
-      username,
-      password,
-      avatar_url,
-      token,
-    });
-    res.json({ message: "ok", _id: result.insertedId.toString(), token });
-  } else res.status(500).json({ message: "already exist" });
-});
+// Updating Profile
 
 route.put("/", auth, async (req, res) => {
   let { username, email } = req.body;
 
+  if (username.length < 4)
+    return res
+      .status(500)
+      .json({ message: "username name must have more than 4 caracters" });
+
   let user = await users.findOne({ token: req.cookies.token });
 
-  users.updateOne({ _id: user.id }, { username, email });
+  users.updateOne(
+    { _id: user.id },
+    { $set: { username, email, edited_timestamp: Date.now() } }
+  );
 });
 
 module.exports = route;

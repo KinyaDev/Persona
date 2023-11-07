@@ -8,14 +8,17 @@ route.use(cookieParser());
 
 route.use(async (req, res, next) => {
   let token = req.cookies["token"];
-  if (!token) return res.redirect("/");
+  if (token === undefined)
+    return res.status(403).json({
+      message: "forbidden, you have to be logged in to access this ressource",
+    });
 
   let user = await users.findOne({ token });
   if (!user) {
-    res.cookie("token", undefined);
-    res.redirect("/");
-
-    return;
+    res.clearCookie("token");
+    return res.status(403).json({
+      message: "forbidden, you have to be logged in to access this ressource",
+    });
   }
 
   next();
