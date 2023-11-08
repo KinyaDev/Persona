@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Persona</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
+    />
+    <link rel="stylesheet" href="/assets/css/main.css" />
+    <link rel="stylesheet" href="/assets/css/register.css" />
+
+    <!-- <script src="https://cdn.tailwindcss.com"></script> -->
+  </head>
+  <body>
+    <%- include("../partials/navbar") %>
+
+    <div class="container">
+      <h1>Register</h1>
+
+      <form method="post" target="_self" action="/api/users">
+        <label for="username">Username</label>
+        <br />
+        <input
+          type="text"
+          name="username"
+          id="username"
+          placeholder="Enter a username..."
+          autocomplete="off"
+          required
+        />
+        <br />
+        <label for="password">Password</label>
+        <br />
+        <input
+          type="password"
+          name="password"
+          id="password"
+          placeholder="Enter a password..."
+          autocomplete="off"
+          required
+        />
+        <br />
+        <p>-</p>
+        <br />
+        <button type="submit">Submit</button>
+      </form>
+
+      <div class="msg-container"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="/assets/js/main.js"></script>
+    <script src="/assets/js/register.js"></script>
+  </body>
+</html>

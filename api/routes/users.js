@@ -42,7 +42,11 @@ route.post("/", notAuth, async (req, res) => {
       .json({ message: "password must have at least 8 caracters" });
 
   let exists = await users.findOne({ username });
-  if (exists) return res.status(500).json({ message: "already exist" });
+  if (exists)
+    return res.status(500).json({
+      message:
+        "username already exist try logging in <a href='/login'>Login</a>",
+    });
 
   let token = createToken();
   let result = await users.insertOne({
@@ -167,7 +171,7 @@ route.put(
         .status(500)
         .json({ message: "avatar must be in the PNG or JPEG format" });
 
-    if (req.file.size > 5 * 10 ** 6)
+    if (req.file.size > 10 ** 6 * 5)
       return res
         .status(500)
         .json({ message: "avatar weight must be inferior to 5MB" });

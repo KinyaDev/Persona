@@ -18,7 +18,23 @@ let apiRoot =
 
 app.use("/api", require("./api/index"));
 
-app.get("/:name", (req, res) => {
+app.get("/register", (req, res) => {
+  if (new Object(req.cookies).hasOwnProperty("token")) return res.redirect("/");
+
+  res.render("pages/register");
+});
+
+app.get("/login", (req, res) => {
+  if (new Object(req.cookies).hasOwnProperty("token")) return res.redirect("/");
+  res.render("pages/login");
+});
+
+app.get("/disconnect", (req, res) => {
+  res.clearCookie("token");
+  res.redirect("/");
+});
+
+app.get("/c/:name", (req, res) => {
   res.render("pages/character", {
     apiRoot,
     characterName: req.params.name,
@@ -30,7 +46,7 @@ app.get("/", (req, res) => {
   res.render("pages/index", { apiRoot });
 });
 
-app.get("/:name/edit", (req, res) => {
+app.get("/c/:name/edit", (req, res) => {
   res.render("pages/character", {
     apiRoot,
     characterName: req.params.name,
